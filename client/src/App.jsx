@@ -6,12 +6,13 @@ import './App.css'
 import LoginPages from './Pages/LoginPages'
 import SignupPages from './Pages/SignupPages'
 import { createRoot } from "react-dom/client";
+ 
 import {
   createBrowserRouter,
   RouterProvider,
-  Route,
-  Link,
+   
 } from "react-router-dom";
+import CartPage from './Pages/CartPage';
 
 
 const router = createBrowserRouter([
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/signup",
     element: <SignupPages></SignupPages>,
+  },
+  {
+    path: "/cart",
+    element:<CartPage></CartPage>
   },
 ]);
 
