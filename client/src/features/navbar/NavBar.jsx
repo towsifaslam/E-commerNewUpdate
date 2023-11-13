@@ -1,7 +1,7 @@
 import {  Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import ProductList from '../product-lists/ProductList'
+import ProductList from '../product-lists/components/ProductList'
 import {Link}from'react-router-dom'
 const user = {
   name: 'Tom Cook',
