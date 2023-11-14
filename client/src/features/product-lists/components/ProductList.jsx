@@ -10,7 +10,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon ,StarIcon, ChevronLeftIcon, ChevronRightIcon} from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom'
 import { useSelector,useDispatch } from 'react-redux'
-import { fetchAllProductsAsync, selectAllProducts,fetchProductByFiltersAsync } from '../productListSlice'
+import {  selectAllProducts,fetchProductByFiltersAsync, selectTotalItems } from '../productListSlice'
  
 
  
@@ -22,11 +22,11 @@ import { fetchAllProductsAsync, selectAllProducts,fetchProductByFiltersAsync } f
     { name: 'Price: High to Low', sort: 'price',order:'desc', current: false },
   ]
   const subCategories = [
-    { name: 'Totes', href: '#' },
-    { name: 'Backpacks', href: '#' },
-    { name: 'Travel Bags', href: '#' },
-    { name: 'Hip Bags', href: '#' },
-    { name: 'Laptop Sleeves', href: '#' },
+    // { name: 'Totes', href: '#' },
+    // { name: 'Backpacks', href: '#' },
+    // { name: 'Travel Bags', href: '#' },
+    // { name: 'Hip Bags', href: '#' },
+    // { name: 'Laptop Sleeves', href: '#' },
   ]
   const filters = [
     {
@@ -235,8 +235,13 @@ import { fetchAllProductsAsync, selectAllProducts,fetchProductByFiltersAsync } f
 export default function ProductList() {
   const dispatch = useDispatch()
  const products =  useSelector(selectAllProducts)
+ const totalItems =  useSelector(selectTotalItems)
+
  const [filter,setFilter]=useState({})
  const [sort,setSort]=useState({})
+ 
+ const[page,setPage]=useState(1)
+ const Limit=10;
  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
 
@@ -266,12 +271,18 @@ const handleSort= (e,option)=>{
   setSort(sort);
   
   }
+  const handlePage = (page)=>{
+    console.log(page)
+    setPage(page)
+  }
  useEffect(() => {
-  
-  dispatch(fetchProductByFiltersAsync({filter,sort}));
-}, [dispatch,filter,sort]);
+  const pagination = {_page:page,_limit:Limit}
+  dispatch(fetchProductByFiltersAsync({filter,sort,pagination}));
+}, [dispatch,filter,sort,page]);
  
- 
+ useEffect(()=>{
+  setPage(1)
+ },[totalItems,sort])
 
  
   return (
@@ -367,7 +378,7 @@ const handleSort= (e,option)=>{
           {/* Section of prdduct and filters ends */}
           {/* start pagination  */}
           <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-       <Pagination></Pagination>
+       <Pagination page={page} setPage={setPage} handlePage={handlePage} Limit={Limit} totalItems={totalItems}></Pagination>
     </div>
         </main>
       </div>
@@ -381,7 +392,7 @@ const handleSort= (e,option)=>{
 
  
 
-function MobileFilter({mobileFiltersOpen,setMobileFiltersOpen,handleFilter}) {
+function MobileFilter({mobileFiltersOpen,setMobileFiltersOpen,handleFilter }) {
   return (
     <Transition.Root show={mobileFiltersOpen} as={Fragment}>
     <Dialog as="div" className="relative z-40 lg:hidden" onClose={setMobileFiltersOpen}>
@@ -548,7 +559,7 @@ function DesktopFilter({handleFilter}) {
   </form>
   )
 }
-function Pagination() {
+function Pagination({page,setPage,handlePage,Limit,totalItems}) {
   return (
     <>
     <div className="flex flex-1 justify-between sm:hidden">
@@ -568,8 +579,8 @@ function Pagination() {
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{' '}
-            <span className="font-medium">97</span> results
+            Showing <span className="font-medium">{(page-1)*Limit +1}</span> to <span className="font-medium">{page*Limit > totalItems ? totalItems: page*Limit}</span> of{' '}
+            <span className="font-medium">{totalItems}</span> results
           </p>
         </div>
         <div>
@@ -582,19 +593,20 @@ function Pagination() {
               <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
             </Link>
             {/* Current: "z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600", Default: "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" */}
-            <Link
-              to="#"
+           {
+            Array.from({length:Math.ceil(totalItems/Limit)}).map((el,index)=>(
+              <div
+              key={index}
+              onClick={e=>handlePage(index+1)}
               aria-current="page"
-              className="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className={`relative z-10 inline-flex items-center ${index+1===page?'bg-indigo-600 text-gray-900':''} px-4 py-2 text-sm font-semibold text-gray-500 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
             >
-              1
-            </Link>
-            <Link
-              to="#"
-              className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-            >
-              2
-            </Link>
+              {index+1}
+            </div>
+            ))
+           }
+          
+        
            
             <Link
               to="#"
